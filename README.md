@@ -2,7 +2,7 @@
 
 ## Build
 
-git clone https://github.com/systemticks/dlt_uart2ip
+git clone https://github.com/systemticks/dlt_uart2ip.git
 
 gradle build fatJar
 
