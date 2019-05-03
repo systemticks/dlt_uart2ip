@@ -1,6 +1,10 @@
 package de.systemticks.dlt.uart2ip;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +15,7 @@ import de.systemticks.dlt.uart2ip.com.ComPortManager;
 import de.systemticks.dlt.uart2ip.com.ComPortReader;
 import de.systemticks.dlt.uart2ip.com.ComPortWriter;
 import de.systemticks.dlt.uart2ip.conf.Config;
+import de.systemticks.dlt.uart2ip.conf.ConfigManager;
 import de.systemticks.dlt.uart2ip.dlt.DltControlMessageCreator;
 import de.systemticks.dlt.uart2ip.dlt.DltHelper;
 import de.systemticks.dlt.uart2ip.dlt.DltMessageServer;
@@ -26,8 +31,9 @@ public class Launcher {
 		// TODO Auto-generated method stub
 
 		logger.info("Starting up ...");
-		Config conf = new Config();
-
+		
+		Config conf = ConfigManager.getConfiguration();
+		
 		// Establish a socket connection and wait for incoming client, such as EB solys or DLT Viewer
 		DltMessageServer server = new DltMessageServer(conf.getServerPort());		
 		new Thread(() -> {
