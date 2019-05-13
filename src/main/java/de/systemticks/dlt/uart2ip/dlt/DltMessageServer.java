@@ -2,6 +2,7 @@ package de.systemticks.dlt.uart2ip.dlt;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -12,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.systemticks.dlt.uart2ip.api.RawBufferHandler;
+import de.systemticks.dlt.uart2ip.com.ComPortReader;
+import de.systemticks.dlt.uart2ip.com.ComPortWriter;
 
 public class DltMessageServer implements RawBufferHandler {
 
@@ -21,12 +24,14 @@ public class DltMessageServer implements RawBufferHandler {
 	private boolean connected = false;
 	private int port;
 	private BufferedInputStream bIns;
+	private RawBufferHandler controlMessageHandler;
 
     private static Logger logger = LoggerFactory.getLogger(DltMessageServer.class);	
 	
-	public DltMessageServer(int serverPort) 
+	public DltMessageServer(int serverPort, RawBufferHandler controlMessageHandler) 
 	{
 		port = serverPort;
+		this.controlMessageHandler = controlMessageHandler;
 	}
 
 	public void setup() {
@@ -42,18 +47,23 @@ public class DltMessageServer implements RawBufferHandler {
 			logger.info("DLT client connected via port: "+port);
 			
 			//TODO : React on control messages
-//			bIns = new BufferedInputStream(clientSocket.getInputStream());
-//			
-//			while(true)
-//			{
-//				byte[] header = new byte[4];			
-//				bIns.read(header);
-//				short msgLen = ByteBuffer.wrap(header, 2, 2).getShort();
-//				byte[] rest = new byte[msgLen-header.length];
-//				bIns.read(rest);				
-//
-//				logger.info("received control message "+header.toString());				
-//			}
+			bIns = new BufferedInputStream(clientSocket.getInputStream());
+			
+			while(true)
+			{
+				byte[] header = new byte[4];			
+				bIns.read(header);
+				short msgLen = ByteBuffer.wrap(header, 2, 2).getShort();
+				byte[] rest = new byte[msgLen-header.length];
+				bIns.read(rest);				
+
+				logger.info("received control message from client");				
+				logger.info(ComPortWriter.encodeHexString(header));				
+				logger.info(ComPortWriter.encodeHexString(rest));
+				
+				byte[] msgToSend = concat(header, rest);
+				controlMessageHandler.processByteBuffer(msgToSend);
+			}
 			
 			
 		} catch (IOException e) {
@@ -63,7 +73,18 @@ public class DltMessageServer implements RawBufferHandler {
 
 		
 	}
+	
+	//FIXME : duplicated
+	private byte[] concat(byte[] header, byte[] rest) throws IOException
+	{
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+		outputStream.write( header );
+		outputStream.write( rest );
 
+		return outputStream.toByteArray( );		
+	}
+
+	
 	public void tearDown() {
 						
 		logger.info("shutdown DLT socket server");

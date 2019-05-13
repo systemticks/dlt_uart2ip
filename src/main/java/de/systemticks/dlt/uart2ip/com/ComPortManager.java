@@ -1,5 +1,8 @@
 package de.systemticks.dlt.uart2ip.com;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fazecast.jSerialComm.SerialPort;
 
 import de.systemticks.dlt.uart2ip.conf.Config;
@@ -7,7 +10,8 @@ import de.systemticks.dlt.uart2ip.conf.Config;
 public class ComPortManager {
 
 	private SerialPort port;
-
+    private static Logger logger = LoggerFactory.getLogger(ComPortWriter.class);	
+	
 	public SerialPort getOrCreatePort(Config conf) {
 		
 		if(port == null)
@@ -29,6 +33,7 @@ public class ComPortManager {
 		
 		return port;
 	}	
+		
 	
 }
 

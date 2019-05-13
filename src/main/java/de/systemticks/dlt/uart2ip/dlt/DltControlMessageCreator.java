@@ -15,8 +15,8 @@ public class DltControlMessageCreator {
 
 		ByteBuffer.wrap(payload).putInt(DltHelper.SERVICE_ID_SET_LOG_LEVEL).put(appId.getBytes()).put(ctxId.getBytes())
 			.put(logLevel).put(reserved);
-		
 
+		
 		return makeControlMessage(payload);
 	}
 

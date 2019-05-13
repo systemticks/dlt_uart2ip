@@ -33,17 +33,17 @@ public class Launcher {
 		logger.info("Starting up ...");
 		
 		Config conf = ConfigManager.getConfiguration();
-		
-		// Establish a socket connection and wait for incoming client, such as EB solys or DLT Viewer
-		DltMessageServer server = new DltMessageServer(conf.getServerPort());		
-		new Thread(() -> {
-			server.setup();
-		}).start();		
-		
 		// Initialize the COM port for reading and writing
 		ComPortManager portManager= new ComPortManager();
 		SerialPort port = portManager.getOrCreatePort(conf);
-				
+		ComPortWriter comWriter = new ComPortWriter(port);
+		
+		// Establish a socket connection and wait for incoming client, such as EB solys or DLT Viewer
+		DltMessageServer server = new DltMessageServer(conf.getServerPort(), comWriter);		
+		new Thread(() -> {
+			server.setup();
+		}).start();		
+						
 		// Reads from UART and writes into a temporary file				
 		ComPortReader comReader = new ComPortReader(port, new TmpFileWriter(conf.getTmpFile()));
 		new Thread(() -> {
@@ -61,9 +61,8 @@ public class Launcher {
 		}
 
 		// Set the initial logging configuration
-		ComPortWriter comWriter = new ComPortWriter(port);
 		byte[] msgToSend = DltControlMessageCreator.createSetLogLevelPayload("VUC", "IPCS", "CTX1", DltHelper.LOG_LEVEL_INFO);
-		comWriter.writeByteBuffer(msgToSend);
+		comWriter.processByteBuffer(msgToSend);
 		
 		// Read from temporary file and write to socket
 		TmpFileReader reader = new TmpFileReader();
@@ -76,7 +75,7 @@ public class Launcher {
 				if(dltMsg != null)
 				{
 					//FIXME: think about decorator pattern
-					//server.handleDltMessage(dltMsg);
+					//server.processByteBuffer(dltMsg);
 					server.processByteBuffer(post.handleRawMessage(dltMsg));
 				}
 			}
