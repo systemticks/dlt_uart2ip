@@ -7,9 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import com.fazecast.jSerialComm.SerialPort;
 
-import de.systemticks.dlt.uart2ip.api.RawBufferHandler;
+import de.systemticks.dlt.uart2ip.api.ByteBufferHandler;
+import de.systemticks.dlt.uart2ip.utils.ByteOperations;
 
-public class ComPortWriter implements RawBufferHandler {
+public class ComPortWriter implements ByteBufferHandler {
 
 	private SerialPort port;
     private static Logger logger = LoggerFactory.getLogger(ComPortWriter.class);	
@@ -24,7 +25,7 @@ public class ComPortWriter implements RawBufferHandler {
 	{
 		//FIXME : Add error handling
 		logger.info("Write control message to com port: ");
-		logger.info(encodeHexString(messageToWrite));
+		logger.info(ByteOperations.bytesToHex(messageToWrite));
 		
 		port.openPort();
 		
@@ -43,22 +44,6 @@ public class ComPortWriter implements RawBufferHandler {
 				
 	}
 	
-	public static String byteToHex(byte num) {
-	    char[] hexDigits = new char[3];
-	    hexDigits[0] = Character.forDigit((num >> 4) & 0xF, 16);
-	    hexDigits[1] = Character.forDigit((num & 0xF), 16);
-	    hexDigits[2] = ' ';
-	    return new String(hexDigits);
-	}
-	public static String encodeHexString(byte[] byteArray) {
-	    StringBuffer hexStringBuffer = new StringBuffer();
-	    for (int i = 0; i < byteArray.length; i++) {
-	        hexStringBuffer.append(byteToHex(byteArray[i]));
-	    }
-	    return hexStringBuffer.toString();
-	}
-
-
 	@Override
 	public void tearDown() {
 		// TODO Auto-generated method stub

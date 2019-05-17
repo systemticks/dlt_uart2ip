@@ -10,9 +10,9 @@ import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.systemticks.dlt.uart2ip.api.RawBufferHandler;
+import de.systemticks.dlt.uart2ip.api.ByteBufferHandler;
 
-public class DltFileWriter implements RawBufferHandler{
+public class DltFileWriter implements ByteBufferHandler{
 
 	private static Logger logger = LoggerFactory.getLogger(DltFileWriter.class);	
 

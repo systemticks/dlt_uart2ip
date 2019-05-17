@@ -32,20 +32,20 @@ public class Launcher {
 
 		logger.info("Starting up ...");
 		
-		Config conf = ConfigManager.getConfiguration();
+		Config config = ConfigManager.getConfiguration();
 		// Initialize the COM port for reading and writing
-		ComPortManager portManager= new ComPortManager();
-		SerialPort port = portManager.getOrCreatePort(conf);
+		ComPortManager portManager = new ComPortManager();
+		SerialPort port = portManager.getOrCreatePort(config);
 		ComPortWriter comWriter = new ComPortWriter(port);
 		
 		// Establish a socket connection and wait for incoming client, such as EB solys or DLT Viewer
-		DltMessageServer server = new DltMessageServer(conf.getServerPort(), comWriter);		
+		DltMessageServer server = new DltMessageServer(config.getServerPort(), comWriter);		
 		new Thread(() -> {
 			server.setup();
 		}).start();		
 						
 		// Reads from UART and writes into a temporary file				
-		ComPortReader comReader = new ComPortReader(port, new TmpFileWriter(conf.getTmpFile()));
+		ComPortReader comReader = new ComPortReader(port, new TmpFileWriter(config.getTmpFile()));
 		new Thread(() -> {
 			comReader.readFromStream();
 			server.tearDown();
@@ -68,7 +68,7 @@ public class Launcher {
 		TmpFileReader reader = new TmpFileReader();
 		PostProcessor post = new PostProcessor();
 		try {
-			reader.open(conf.getTmpFile());
+			reader.open(config.getTmpFile());
 			while(true)
 			{				
 				byte[] dltMsg = reader.readHeader();

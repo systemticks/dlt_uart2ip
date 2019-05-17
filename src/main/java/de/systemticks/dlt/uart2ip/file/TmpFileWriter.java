@@ -5,9 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import de.systemticks.dlt.uart2ip.api.RawBufferHandler;
+import de.systemticks.dlt.uart2ip.api.ByteBufferHandler;
 
-public class TmpFileWriter implements RawBufferHandler {
+public class TmpFileWriter implements ByteBufferHandler {
 
 	private String filename;
 	private FileOutputStream fop;

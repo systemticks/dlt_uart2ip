@@ -12,11 +12,12 @@ import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.systemticks.dlt.uart2ip.api.RawBufferHandler;
+import de.systemticks.dlt.uart2ip.api.ByteBufferHandler;
 import de.systemticks.dlt.uart2ip.com.ComPortReader;
 import de.systemticks.dlt.uart2ip.com.ComPortWriter;
+import de.systemticks.dlt.uart2ip.utils.ByteOperations;
 
-public class DltMessageServer implements RawBufferHandler {
+public class DltMessageServer implements ByteBufferHandler {
 
 	private ServerSocket serverSocket;
 	private Socket clientSocket;
@@ -24,11 +25,11 @@ public class DltMessageServer implements RawBufferHandler {
 	private boolean connected = false;
 	private int port;
 	private BufferedInputStream bIns;
-	private RawBufferHandler controlMessageHandler;
+	private ByteBufferHandler controlMessageHandler;
 
     private static Logger logger = LoggerFactory.getLogger(DltMessageServer.class);	
 	
-	public DltMessageServer(int serverPort, RawBufferHandler controlMessageHandler) 
+	public DltMessageServer(int serverPort, ByteBufferHandler controlMessageHandler) 
 	{
 		port = serverPort;
 		this.controlMessageHandler = controlMessageHandler;
@@ -58,10 +59,10 @@ public class DltMessageServer implements RawBufferHandler {
 				bIns.read(rest);				
 
 				logger.info("received control message from client");				
-				logger.info(ComPortWriter.encodeHexString(header));				
-				logger.info(ComPortWriter.encodeHexString(rest));
+				logger.info(ByteOperations.bytesToHex(header));				
+				logger.info(ByteOperations.bytesToHex(rest));
 				
-				byte[] msgToSend = concat(header, rest);
+				byte[] msgToSend = ByteOperations.concat(header, rest);
 				controlMessageHandler.processByteBuffer(msgToSend);
 			}
 			
@@ -73,18 +74,7 @@ public class DltMessageServer implements RawBufferHandler {
 
 		
 	}
-	
-	//FIXME : duplicated
-	private byte[] concat(byte[] header, byte[] rest) throws IOException
-	{
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-		outputStream.write( header );
-		outputStream.write( rest );
-
-		return outputStream.toByteArray( );		
-	}
-
-	
+		
 	public void tearDown() {
 						
 		logger.info("shutdown DLT socket server");
