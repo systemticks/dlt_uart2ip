@@ -1,6 +1,5 @@
 package de.systemticks.dlt.uart2ip.dlt;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 

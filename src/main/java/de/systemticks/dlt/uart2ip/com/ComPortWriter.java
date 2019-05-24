@@ -1,7 +1,5 @@
 package de.systemticks.dlt.uart2ip.com;
 
-import java.math.BigInteger;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,10 +1,6 @@
 package de.systemticks.dlt.uart2ip;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +14,6 @@ import de.systemticks.dlt.uart2ip.conf.Config;
 import de.systemticks.dlt.uart2ip.conf.ConfigManager;
 import de.systemticks.dlt.uart2ip.conf.LogLevelItem;
 import de.systemticks.dlt.uart2ip.dlt.DltControlMessageCreator;
-import de.systemticks.dlt.uart2ip.dlt.DltHelper;
 import de.systemticks.dlt.uart2ip.dlt.DltMessageServer;
 import de.systemticks.dlt.uart2ip.file.TmpFileReader;
 import de.systemticks.dlt.uart2ip.file.TmpFileWriter;
@@ -65,16 +60,12 @@ public class Launcher {
 		// Set the initial logging configuration
 //		byte[] msgToSend = DltControlMessageCreator.createSetLogLevelPayload("VUC", "IPCS", "CTX1", DltHelper.LOG_LEVEL_INFO);
 
-//		for (LogLevelItem l : config.getSetLogLevels()) {
-//			comWriter.processByteBuffer(
-//					DltControlMessageCreator.createSetLogLevelDltSll(l.getEcuId(), l.getAppId(), l.getCtxId(),
-//							l.getLevel())
-//			);
-//		}
-
-		byte[] msgToSend = DltControlMessageCreator.createSetLogLevelDltSll("VUC", "IPCS", "CTX1",
-				DltHelper.LOG_LEVEL_INFO);
-		comWriter.processByteBuffer(msgToSend);
+		for (LogLevelItem l : config.getSetLogLevels()) {
+			comWriter.processByteBuffer(
+					DltControlMessageCreator.createSetLogLevelDltSll(l.getEcuId(), l.getAppId(), l.getCtxId(),
+							l.getLevel())
+			);
+		}
 
 		// Read from temporary file and write to socket
 		TmpFileReader reader = new TmpFileReader();
