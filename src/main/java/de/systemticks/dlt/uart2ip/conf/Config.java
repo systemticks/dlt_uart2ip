@@ -1,5 +1,8 @@
 package de.systemticks.dlt.uart2ip.conf;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Config {
 
 	private String comPort;
@@ -7,6 +10,9 @@ public class Config {
 	private int dataBits;
 	private int stopBits;
 	private String parity;
+	private boolean forwardToClient;
+	private boolean forwardToECU;
+	private List<LogLevelItem> setLogLevels;
 	
 	private int serverPort;
 	private String tmpFile = "raw_uart.tmp";
@@ -19,14 +25,30 @@ public class Config {
 		stopBits = 1;
 		parity = "NO_PARITY";
 		serverPort = 3490;
+		forwardToClient = true;
+		forwardToECU = false;
+		setLogLevels = new ArrayList<>();
+	}		
+	
+	public boolean isForwardToClient() {
+		return forwardToClient;
 	}
-	
-	
-	
+
+	public void setForwardToClient(boolean forwardToClient) {
+		this.forwardToClient = forwardToClient;
+	}
+
+	public boolean isForwardToECU() {
+		return forwardToECU;
+	}
+
+	public void setForwardToECU(boolean forwardToECU) {
+		this.forwardToECU = forwardToECU;
+	}
+
 	public String getTmpFile() {
 		return tmpFile;
 	}
-
 
 	public void setTmpFile(String tmpFile) {
 		this.tmpFile = tmpFile;
@@ -79,4 +101,14 @@ public class Config {
 	public void setServerPort(int serverPort) {
 		this.serverPort = serverPort;
 	}
+
+	public void addLogLevel(LogLevelItem item) {		
+		setLogLevels.add(item);		
+	}
+
+	public List<LogLevelItem> getSetLogLevels() {
+		return setLogLevels;
+	}
+	
+	
 }

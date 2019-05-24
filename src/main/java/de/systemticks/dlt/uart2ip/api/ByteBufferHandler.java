@@ -1,8 +1,6 @@
 package de.systemticks.dlt.uart2ip.api;
 
-import java.io.IOException;
-
-public interface RawBufferHandler {
+public interface ByteBufferHandler {
 
 	public void processByteBuffer(byte[] buffer);
 	

@@ -5,29 +5,18 @@ import org.slf4j.LoggerFactory;
 
 import com.fazecast.jSerialComm.SerialPort;
 
-import de.systemticks.dlt.uart2ip.api.RawBufferHandler;
+import de.systemticks.dlt.uart2ip.api.ByteBufferHandler;
+import de.systemticks.dlt.uart2ip.utils.ByteOperations;
 
 public class ComPortReader {
 	
 	private SerialPort port;
 	private boolean reading = true;
-	private RawBufferHandler rawBufferHandler;
+	private ByteBufferHandler rawBufferHandler;
 
-	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
     private static Logger logger = LoggerFactory.getLogger(ComPortReader.class);	
 
-	private static String bytesToHex(byte[] bytes) {
-	    char[] hexChars = new char[bytes.length * 3];
-	    for ( int j = 0; j < bytes.length; j++ ) {
-	        int v = bytes[j] & 0xFF;
-	        hexChars[j * 3] = hexArray[v >>> 4];
-	        hexChars[j * 3 + 1] = hexArray[v & 0x0F];
-	        hexChars[j * 3 + 2] = ' ';
-	    }
-	    return new String(hexChars);
-	}	
-
-	public ComPortReader(SerialPort port, RawBufferHandler rawBufferHandler)
+	public ComPortReader(SerialPort port, ByteBufferHandler rawBufferHandler)
 	{
 		this.port = port;
 		this.rawBufferHandler = rawBufferHandler;
@@ -60,7 +49,7 @@ public class ComPortReader {
 				byte[] readBuffer = new byte[port.bytesAvailable()];
 				int numRead = port.readBytes(readBuffer, readBuffer.length);
 				
-				logger.debug(ComPortReader.bytesToHex(readBuffer));
+				logger.debug(ByteOperations.bytesToHex(readBuffer));
 				if(numRead >= 0)
 				{
 					rawBufferHandler.processByteBuffer(readBuffer);

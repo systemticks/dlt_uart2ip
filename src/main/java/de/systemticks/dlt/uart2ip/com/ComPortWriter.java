@@ -5,7 +5,10 @@ import org.slf4j.LoggerFactory;
 
 import com.fazecast.jSerialComm.SerialPort;
 
-public class ComPortWriter {
+import de.systemticks.dlt.uart2ip.api.ByteBufferHandler;
+import de.systemticks.dlt.uart2ip.utils.ByteOperations;
+
+public class ComPortWriter implements ByteBufferHandler {
 
 	private SerialPort port;
     private static Logger logger = LoggerFactory.getLogger(ComPortWriter.class);	
@@ -16,10 +19,11 @@ public class ComPortWriter {
 		this.port = _port;		
 	}
 	
-	public void writeByteBuffer(byte[] messageToWrite)
+	public void processByteBuffer(byte[] messageToWrite)
 	{
 		//FIXME : Add error handling
-		logger.info("Write control message to com port");
+		logger.info("Write control message to com port: ");
+		logger.info(ByteOperations.bytesToHex(messageToWrite));
 		
 		port.openPort();
 		
@@ -30,7 +34,6 @@ public class ComPortWriter {
 			{
 				logger.error("Write to com port failed!");
 			}
-			//port.closePort();
 		}
 		else 
 		{
@@ -39,4 +42,15 @@ public class ComPortWriter {
 				
 	}
 	
+	@Override
+	public void tearDown() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setup() {
+		// TODO Auto-generated method stub
+		
+	}	
 }

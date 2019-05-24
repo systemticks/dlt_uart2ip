@@ -7,7 +7,7 @@ import de.systemticks.dlt.uart2ip.conf.Config;
 public class ComPortManager {
 
 	private SerialPort port;
-
+	
 	public SerialPort getOrCreatePort(Config conf) {
 		
 		if(port == null)
@@ -29,6 +29,7 @@ public class ComPortManager {
 		
 		return port;
 	}	
+		
 	
 }
 

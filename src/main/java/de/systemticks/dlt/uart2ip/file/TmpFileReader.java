@@ -8,6 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import de.systemticks.dlt.uart2ip.utils.ByteOperations;
+
 public class TmpFileReader {
 
 	private File tempFile;
@@ -39,7 +41,7 @@ public class TmpFileReader {
 				}
 				bInS.read(restOfMessage);
 
-				return concat(header, restOfMessage);					
+				return ByteOperations.concat(header, restOfMessage);					
 			}
 
 			return null;
@@ -49,14 +51,6 @@ public class TmpFileReader {
 
 	}
 	
-	private byte[] concat(byte[] header, byte[] rest) throws IOException
-	{
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-		outputStream.write( header );
-		outputStream.write( rest );
-
-		return outputStream.toByteArray( );		
-	}
 
 	private boolean isHeaderOk() {
 		return (ECU_ID_MARKER[0] == header[4] && ECU_ID_MARKER[1] == header[5] && ECU_ID_MARKER[2] == header[6]
