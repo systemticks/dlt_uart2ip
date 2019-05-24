@@ -4,13 +4,26 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.systemticks.dlt.uart2ip.utils.ByteOperations;
 import de.systemticks.dlt.uart2ip.utils.TimeHelper;
 
 public class DltControlMessageCreator {
 
+	private static Logger logger = LoggerFactory.getLogger(DltControlMessageCreator.class);	
+	
+	// 4 Byte ServiceId
+	// 4 Byte appId
+	// 4 Byte ctxId
+	// 1 Byte Log Level
+	// 4 Byte reserverd
+	private final static int SET_LOG_LEVE_PAYLOAD_SIZE = 17;
+
 	public static byte[] createSetLogLevelPayload(String ecuId, String appId, String ctxId, byte logLevel) {
 		// payload = service Id + parameters (appId, ctxId, logLevel, 4 bytes "remo")
-		byte[] payload = new byte[17];
+		byte[] payload = new byte[SET_LOG_LEVE_PAYLOAD_SIZE];
 		byte[] reserved = "remo".getBytes();
 
 		ByteBuffer.wrap(payload).putInt(DltHelper.SERVICE_ID_SET_LOG_LEVEL).put(appId.getBytes()).put(ctxId.getBytes())
@@ -18,6 +31,15 @@ public class DltControlMessageCreator {
 
 		
 		return makeControlMessage(payload);
+	}
+
+	public static byte[] createSetLogLevelDltSll(String ecuId, String appId, String ctxId, byte logLevel) {
+
+		StringBuffer buf = new StringBuffer("{dlt-sll ");
+		buf.append(appId).append("/").append(ctxId).append("/").append(logLevel).append("}");
+		
+		return buf.toString().getBytes();
+		
 	}
 
 	public static byte[] makeControlMessage(byte[] payload)
@@ -49,16 +71,15 @@ public class DltControlMessageCreator {
 		// Bytes 6-9 ctx id		
 		exBuf.put(stringIdAsBytes("CON"));
 		
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-		try {
-			outputStream.write( standardHeader );
-			outputStream.write( extendedHeader );
-			outputStream.write( payload );
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		byte[] message = null;
 		
-		return outputStream.toByteArray( );		
+		try {
+			message = ByteOperations.concat(standardHeader, extendedHeader, payload);
+		} catch (IOException e1) {
+			logger.error(e1.getMessage());
+		}
+				
+		return message;		
 		
 	}
 	

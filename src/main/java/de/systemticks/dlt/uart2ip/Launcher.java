@@ -16,6 +16,7 @@ import de.systemticks.dlt.uart2ip.com.ComPortReader;
 import de.systemticks.dlt.uart2ip.com.ComPortWriter;
 import de.systemticks.dlt.uart2ip.conf.Config;
 import de.systemticks.dlt.uart2ip.conf.ConfigManager;
+import de.systemticks.dlt.uart2ip.conf.LogLevelItem;
 import de.systemticks.dlt.uart2ip.dlt.DltControlMessageCreator;
 import de.systemticks.dlt.uart2ip.dlt.DltHelper;
 import de.systemticks.dlt.uart2ip.dlt.DltMessageServer;
@@ -25,26 +26,27 @@ import de.systemticks.dlt.uart2ip.utils.PostProcessor;
 
 public class Launcher {
 
-    private static Logger logger = LoggerFactory.getLogger(Launcher.class);	
-		
+	private static Logger logger = LoggerFactory.getLogger(Launcher.class);
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
 		logger.info("Starting up ...");
-		
+
 		Config config = ConfigManager.getConfiguration();
 		// Initialize the COM port for reading and writing
 		ComPortManager portManager = new ComPortManager();
 		SerialPort port = portManager.getOrCreatePort(config);
 		ComPortWriter comWriter = new ComPortWriter(port);
-		
-		// Establish a socket connection and wait for incoming client, such as EB solys or DLT Viewer
-		DltMessageServer server = new DltMessageServer(config.getServerPort(), comWriter);		
+
+		// Establish a socket connection and wait for incoming client, such as EB solys
+		// or DLT Viewer
+		DltMessageServer server = new DltMessageServer(config.getServerPort(), comWriter, config.isForwardToECU());
 		new Thread(() -> {
 			server.setup();
-		}).start();		
-						
-		// Reads from UART and writes into a temporary file				
+		}).start();
+
+		// Reads from UART and writes into a temporary file
 		ComPortReader comReader = new ComPortReader(port, new TmpFileWriter(config.getTmpFile()));
 		new Thread(() -> {
 			comReader.readFromStream();
@@ -52,7 +54,7 @@ public class Launcher {
 			logger.info("Shutting down ...");
 			System.exit(0);
 		}).start();
-		
+
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e1) {
@@ -61,25 +63,33 @@ public class Launcher {
 		}
 
 		// Set the initial logging configuration
-		byte[] msgToSend = DltControlMessageCreator.createSetLogLevelPayload("VUC", "IPCS", "CTX1", DltHelper.LOG_LEVEL_INFO);
+//		byte[] msgToSend = DltControlMessageCreator.createSetLogLevelPayload("VUC", "IPCS", "CTX1", DltHelper.LOG_LEVEL_INFO);
+
+//		for (LogLevelItem l : config.getSetLogLevels()) {
+//			comWriter.processByteBuffer(
+//					DltControlMessageCreator.createSetLogLevelDltSll(l.getEcuId(), l.getAppId(), l.getCtxId(),
+//							l.getLevel())
+//			);
+//		}
+
+		byte[] msgToSend = DltControlMessageCreator.createSetLogLevelDltSll("VUC", "IPCS", "CTX1",
+				DltHelper.LOG_LEVEL_INFO);
 		comWriter.processByteBuffer(msgToSend);
-		
+
 		// Read from temporary file and write to socket
 		TmpFileReader reader = new TmpFileReader();
-		PostProcessor post = new PostProcessor();
+		PostProcessor postProcess = new PostProcessor();
 		try {
 			reader.open(config.getTmpFile());
-			while(true)
-			{				
+			while (true) {
 				byte[] dltMsg = reader.readHeader();
-				if(dltMsg != null)
-				{
-					//FIXME: think about decorator pattern
-					//server.processByteBuffer(dltMsg);
-					server.processByteBuffer(post.handleRawMessage(dltMsg));
+				if (dltMsg != null) {
+					// FIXME: think about decorator pattern
+					// server.processByteBuffer(dltMsg);
+					server.processByteBuffer(postProcess.handleRawMessage(dltMsg));
 				}
 			}
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			logger.error(e.getMessage());

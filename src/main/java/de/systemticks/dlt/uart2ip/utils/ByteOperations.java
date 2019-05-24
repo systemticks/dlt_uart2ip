@@ -26,6 +26,16 @@ public class ByteOperations {
 
 		return outputStream.toByteArray( );		
 	}
-	
+
+	public static byte[] concat(byte[] arr1, byte[] arr2, byte[] arr3) throws IOException
+	{
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+		outputStream.write( arr1 );
+		outputStream.write( arr2 );
+		outputStream.write( arr3 );
+
+		return outputStream.toByteArray( );		
+	}
+
 	
 }

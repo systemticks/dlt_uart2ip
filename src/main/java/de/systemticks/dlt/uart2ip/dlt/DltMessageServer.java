@@ -26,13 +26,15 @@ public class DltMessageServer implements ByteBufferHandler {
 	private int port;
 	private BufferedInputStream bIns;
 	private ByteBufferHandler controlMessageHandler;
+	private boolean forwardMessages;
 
     private static Logger logger = LoggerFactory.getLogger(DltMessageServer.class);	
 	
-	public DltMessageServer(int serverPort, ByteBufferHandler controlMessageHandler) 
+	public DltMessageServer(int serverPort, ByteBufferHandler controlMessageHandler, boolean forwardMessages) 
 	{
 		port = serverPort;
 		this.controlMessageHandler = controlMessageHandler;
+		this.forwardMessages = forwardMessages;
 	}
 
 	public void setup() {
@@ -46,26 +48,27 @@ public class DltMessageServer implements ByteBufferHandler {
 
 			connected = true;
 			logger.info("DLT client connected via port: "+port);
-			
-			//TODO : React on control messages
-			bIns = new BufferedInputStream(clientSocket.getInputStream());
-			
-			while(true)
+						
+			if(forwardMessages)
 			{
-				byte[] header = new byte[4];			
-				bIns.read(header);
-				short msgLen = ByteBuffer.wrap(header, 2, 2).getShort();
-				byte[] rest = new byte[msgLen-header.length];
-				bIns.read(rest);				
+				bIns = new BufferedInputStream(clientSocket.getInputStream());
+				while(true)
+				{
+					byte[] header = new byte[4];			
+					bIns.read(header);
+					short msgLen = ByteBuffer.wrap(header, 2, 2).getShort();
+					byte[] rest = new byte[msgLen-header.length];
+					bIns.read(rest);				
 
-				logger.info("received control message from client");				
-				logger.info(ByteOperations.bytesToHex(header));				
-				logger.info(ByteOperations.bytesToHex(rest));
-				
-				byte[] msgToSend = ByteOperations.concat(header, rest);
-				controlMessageHandler.processByteBuffer(msgToSend);
+					logger.info("received control message from client");				
+					logger.info(ByteOperations.bytesToHex(header));				
+					logger.info(ByteOperations.bytesToHex(rest));
+					
+					byte[] msgToSend = ByteOperations.concat(header, rest);
+					controlMessageHandler.processByteBuffer(msgToSend);
+				}				
 			}
-			
+						
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
