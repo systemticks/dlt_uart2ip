@@ -29,13 +29,13 @@ public class ComPortReader {
 
 	public void readFromStream() {
 		
-		logger.info("Start reading from com port");
+		logger.info("Start reading from com port "+port.getSystemPortName());
 		
 		port.openPort();
 		
 		if(!port.openPort())
 		{
-			logger.error("Cannot open com port "+port.getPortDescription()+" for reading");
+			logger.error("Cannot open com port "+port.getSystemPortName()+" for reading");
 			return;
 		}
 		
@@ -43,7 +43,7 @@ public class ComPortReader {
 		
 		try {
 			while (reading) {
-				while (port.bytesAvailable() == 0)
+				while (port.bytesAvailable() <= 0)
 					Thread.sleep(20);
 
 				byte[] readBuffer = new byte[port.bytesAvailable()];
@@ -56,7 +56,7 @@ public class ComPortReader {
 				}
 				else
 				{
-					logger.error("Error while reading from com port");
+					logger.error("Error while reading from com port ");
 				}				
 			}
 		} catch (Exception e) {

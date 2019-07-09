@@ -17,6 +17,7 @@ import de.systemticks.dlt.uart2ip.dlt.DltControlMessageCreator;
 import de.systemticks.dlt.uart2ip.dlt.DltMessageServer;
 import de.systemticks.dlt.uart2ip.file.TmpFileReader;
 import de.systemticks.dlt.uart2ip.file.TmpFileWriter;
+import de.systemticks.dlt.uart2ip.nondlt.TextTrace2DltMapper;
 import de.systemticks.dlt.uart2ip.utils.PostProcessor;
 
 public class Launcher {
@@ -41,7 +42,7 @@ public class Launcher {
 			server.setup();
 		}).start();
 
-		// Reads from UART and writes into a temporary file
+		// Reads DLT Logs from UART and writes into a temporary file
 		ComPortReader comReader = new ComPortReader(port, new TmpFileWriter(config.getTmpFile()));
 		new Thread(() -> {
 			comReader.readFromStream();
@@ -61,11 +62,22 @@ public class Launcher {
 //		byte[] msgToSend = DltControlMessageCreator.createSetLogLevelPayload("VUC", "IPCS", "CTX1", DltHelper.LOG_LEVEL_INFO);
 
 		for (LogLevelItem l : config.getSetLogLevels()) {
-			comWriter.processByteBuffer(
-					DltControlMessageCreator.createSetLogLevelDltSll(l.getEcuId(), l.getAppId(), l.getCtxId(),
-							l.getLevel())
-			);
+			comWriter.processByteBuffer(DltControlMessageCreator.createSetLogLevelDltSll(l.getEcuId(), l.getAppId(),
+					l.getCtxId(), l.getLevel()));
 		}
+
+		// Reads from UART - SoC Logs
+		Config socCconf = new Config();
+		socCconf.setComPort("COM5");
+		ComPortReader com5Reader = new ComPortReader(portManager.getOrCreatePort(socCconf),
+				new TextTrace2DltMapper(new TmpFileWriter("soc.logs")));
+//		ComPortReader com5Reader = new ComPortReader(portManager.getOrCreatePort(socCconf),new TmpFileWriter("soc.logs"));
+		new Thread(() -> {
+			com5Reader.readFromStream();
+			// server.tearDown();
+			// logger.info("Shutting down ...");
+			// System.exit(0);
+		}).start();
 
 		// Read from temporary file and write to socket
 		TmpFileReader reader = new TmpFileReader();

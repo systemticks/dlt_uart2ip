@@ -6,6 +6,8 @@ public class DltHelper {
 	
 	// Use Extended Header
 	public final static byte STD_HTYP_UEH = 0x01;
+	// Use Big Endian (Most Significant Byte first)
+	public final static byte STD_HTYP_MSBF = 0x02;
 	// With ECU Id
 	public final static byte STD_HTYP_WEID = 0x04;		
 	// With session Id
@@ -17,6 +19,9 @@ public class DltHelper {
 	
 	
 	public final static byte EXH_MSIN_MSTP_CTRL = 0x03;
+	public final static byte EXH_MSIN_MSTP_LOG = 0x00;
+	
+	
 	public final static byte EXH_MSIN_MTIN_CTRL_REQUEST = 0x01;
 	
 	public final static int SERVICE_ID_SET_LOG_LEVEL = 0x01;
