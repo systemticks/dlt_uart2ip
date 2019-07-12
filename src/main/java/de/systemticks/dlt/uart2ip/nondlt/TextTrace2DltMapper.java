@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.systemticks.dlt.uart2ip.api.ByteBufferHandler;
-import de.systemticks.dlt.uart2ip.dlt.DltControlMessageCreator;
 import de.systemticks.dlt.uart2ip.dlt.DltHelper;
+import de.systemticks.dlt.uart2ip.dlt.DltMessage;
 import de.systemticks.dlt.uart2ip.utils.ByteOperations;
 import de.systemticks.dlt.uart2ip.utils.TimeHelper;
 
@@ -40,9 +40,9 @@ public class TextTrace2DltMapper implements ByteBufferHandler {
 	
 	@Override
 	public void processByteBuffer(byte[] buffer) {
-
-		String s = new String(buffer);
 		
+		String s = new String(buffer);
+
 		Matcher matcher = pattern.matcher(new String(s));
 		
 		if(matcher.matches())
@@ -70,7 +70,7 @@ public class TextTrace2DltMapper implements ByteBufferHandler {
 				break;
 			}
 			
-			origin.processByteBuffer(makeControlMessage(matcher.group(GROUP_RAW_MESSAGE), matcher.group(GROUP_APPL), "SOC", dltLogLevel));
+			origin.processByteBuffer(makeDltMessage(matcher.group(GROUP_RAW_MESSAGE), matcher.group(GROUP_APPL), "SOC", dltLogLevel).getRawData() );
 		}
 					
 		else
@@ -79,7 +79,7 @@ public class TextTrace2DltMapper implements ByteBufferHandler {
 		}
 	}	
 	
-	public byte[] makeControlMessage(String text, String appId, String ctxId, byte logLevel)
+	public DltMessage makeDltMessage(String text, String appId, String ctxId, byte logLevel)
 	{
 		byte[] standardHeader = new byte[12];
 		byte[] extendedHeader = new byte[10];
@@ -126,7 +126,7 @@ public class TextTrace2DltMapper implements ByteBufferHandler {
 			logger.error(e1.getMessage());
 		}
 				
-		return message;		
+		return new DltMessage(message);		
 		
 	}	
 	
